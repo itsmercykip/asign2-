@@ -1,0 +1,182 @@
+#include <iostream>
+#include <string>
+#include <stdexcept>
+
+class Person {
+protected:
+    std::string name;
+    int age;
+    std::string gender;
+public:
+    Person() : name(""), age(0), gender("") {}
+    void getDetails() {
+        std::cout << "Enter name: ";
+        std::cin >> name;
+        std::cout << "Enter age: ";
+        std::cin >> age;
+        std::cout << "Enter gender: ";
+        std::cin >> gender;
+    }
+    void displayDetails() {
+        std::cout << "Name: " << name << "\nAge: " << age << "\nGender: " << gender << std::endl;
+    }
+};
+
+class Student : public Person {
+private:
+    std::string studentID;
+    std::string course;
+    int year;
+public:
+    Student() : studentID(""), course(""), year(0) {}
+    void getStudentDetails() {
+        getDetails();
+        std::cout << "Enter student ID: ";
+        std::cin >> studentID;
+        std::cout << "Enter course: ";
+        std::cin >> course;
+        std::cout << "Enter year: ";
+        std::cin >> year;
+    }
+    void displayStudentDetails() {
+        displayDetails();
+        std::cout << "Student ID: " << studentID << "\nCourse: " << course << "\nYear: " << year << std::endl;
+    }
+    std::string getID() {
+        return studentID;
+    }
+};
+
+class Room {
+private:
+    int roomNumber;
+    int capacity;
+    int occupancy;
+    Student* students[10];
+public:
+    Room() : roomNumber(0), capacity(0), occupancy(0) {
+        for(int i = 0; i < 10; ++i) {
+            students[i] = nullptr;
+        }
+    }
+    void assignStudent(Student* student) {
+        if(occupancy < capacity) {
+            students[occupancy++] = student;
+        } else {
+            throw std::runtime_error("Room is full!");
+        }
+    }
+    void removeStudent(std::string studentID) {
+        for(int i = 0; i < occupancy; ++i) {
+            if(students[i]->getID() == studentID) {
+                students[i] = students[--occupancy];
+                return;
+            }
+        }
+        throw std::runtime_error("Student not found in room!");
+    }
+    void displayRoomDetails() {
+        std::cout << "Room Number: " << roomNumber << "\nCapacity: " << capacity << "\nOccupancy: " << occupancy << std::endl;
+        for(int i = 0; i < occupancy; ++i) {
+            students[i]->displayStudentDetails();
+        }
+    }
+    void setRoomDetails(int number, int cap) {
+        roomNumber = number;
+        capacity = cap;
+    }
+    int getRoomNumber() {
+        return roomNumber;
+    }
+};
+
+class Hostel {
+private:
+    Room rooms[10];
+    int totalRooms;
+public:
+    Hostel() : totalRooms(0) {}
+    void addRoom(int roomNumber, int capacity) {
+        if(totalRooms < 10) {
+            rooms[totalRooms].setRoomDetails(roomNumber, capacity);
+            ++totalRooms;
+        } else {
+            throw std::runtime_error("Hostel capacity full!");
+        }
+    }
+    void bookRoom(int roomNumber, Student* student) {
+        for(int i = 0; i < totalRooms; ++i) {
+            if(rooms[i].getRoomNumber() == roomNumber) {
+                rooms[i].assignStudent(student);
+                return;
+            }
+        }
+        throw std::runtime_error("Room not found!");
+    }
+    void releaseRoom(int roomNumber, std::string studentID) {
+        for(int i = 0; i < totalRooms; ++i) {
+            if(rooms[i].getRoomNumber() == roomNumber) {
+                rooms[i].removeStudent(studentID);
+                return;
+            }
+        }
+        throw std::runtime_error("Room not found!");
+    }
+    void displayHostelDetails() {
+        for(int i = 0; i < totalRooms; ++i) {
+            rooms[i].displayRoomDetails();
+        }
+    }
+};
+
+class Payment {
+private:
+    std::string paymentID;
+    double amount;
+    std::string date;
+    std::string studentID;
+public:
+    Payment() : paymentID(""), amount(0.0), date(""), studentID("") {}
+    void makePayment() {
+        std::cout << "Enter payment ID: ";
+        std::cin >>
+        paymentID;
+        std::cout << "Enter amount: ";
+        std::cin >> amount;
+        std::cout << "Enter date: ";
+        std::cin >> date;
+        std::cout << "Enter student ID: ";
+        std::cin >> studentID;
+    }
+    void displayPaymentDetails() {
+        std::cout << "Payment ID: " << paymentID << "\nAmount: " << amount << "\nDate: " << date << "\nStudent ID: " << studentID << std::endl;
+    }
+};
+
+int main() {
+    Hostel hostel;
+    try {
+        hostel.addRoom(101, 2);
+        hostel.addRoom(102, 3);
+
+        Student s1, s2;
+        s1.getStudentDetails();
+        s2.getStudentDetails();
+
+        hostel.bookRoom(101, &s1);
+        hostel.bookRoom(102, &s2);
+
+        hostel.displayHostelDetails();
+
+        hostel.releaseRoom(101, s1.getID());
+        hostel.displayHostelDetails();
+    } catch(const std::runtime_error& e) {
+        std::cerr << "Error: " << e.what() << std::endl;
+    }
+
+    Payment p1;
+    p1.makePayment();
+    p1.displayPaymentDetails();
+
+    return 0;
+}
